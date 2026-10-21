@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0d0820">
+<title>Video Recording Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #0b0720;
+    --plum: #1d0f40;
+    --card: rgba(34, 18, 70, 0.72);
+    --gold: #e2bd6b;
+    --gold-bright: #f7dc95;
+    --gold-dim: rgba(226, 189, 107, 0.35);
+    --lilac: #b79cff;
+    --rose: #e58fb3;
+    --text: #f4ecff;
+    --muted: #a898cc;
+    --display: "Cinzel", "Trajan Pro", Georgia, serif;
+    --body: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--night); }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--text);
+    font-family: var(--body);
+    background:
+      radial-gradient(ellipse 80% 55% at 50% 0%, #3b1f78 0%, transparent 70%),
+      radial-gradient(ellipse 70% 50% at 85% 100%, #4a1a5c 0%, transparent 65%),
+      radial-gradient(ellipse 60% 45% at 10% 70%, #1a2a6c55 0%, transparent 70%),
+      linear-gradient(180deg, #120a2e 0%, var(--night) 100%);
+    background-attachment: fixed;
+    overflow-x: hidden;
+  }
+
+  /* ---------- Background layers ---------- */
+  #sky, #wheel {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+  }
+  #sky { inset: 0; width: 100%; height: 100%; }
+  #wheel {
+    top: 50%; left: 50%;
+    width: min(135vmin, 1000px);
+    height: min(135vmin, 1000px);
+    margin: calc(min(135vmin, 1000px) / -2) 0 0 calc(min(135vmin, 1000px) / -2);
+    opacity: 0.2;
+    color: var(--gold);
+  }
+  #wheel .outer { transform-origin: center; animation: spin 300s linear infinite; }
+  #wheel .inner { transform-origin: center; animation: spin 220s linear infinite reverse; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- Layout ---------- */
+  main {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 36px 18px 72px;
+  }
+  header { text-align: center; margin-bottom: 18px; }
+  .orn {
+    color: var(--gold);
+    letter-spacing: 0.6em;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    text-shadow: 0 0 12px var(--gold-dim);
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(1.6rem, 6vw, 2.3rem);
+    line-height: 1.2;
+    margin: 0;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold) 60%, #b98b3c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 14px rgba(226, 189, 107, 0.35));
+  }
+  .subtitle {
+    margin: 8px 0 0;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  /* ---------- Constellation progress ---------- */
+  .constellation { margin: 14px 0 22px; text-align: center; }
+  #constellation { width: 100%; max-width: 420px; height: auto; overflow: visible; }
+  #constellation .line { stroke: rgba(183, 156, 255, 0.3); stroke-width: 1; stroke-dasharray: 3 4; transition: stroke 0.5s; }
+  #constellation .line.lit { stroke: var(--gold); stroke-dasharray: none; stroke-width: 1.5; filter: drop-shadow(0 0 3px var(--gold)); }
+  #constellation .star { fill: var(--night); stroke: var(--lilac); stroke-width: 1.5; transition: fill 0.4s, stroke 0.4s; }
+  #constellation .star.lit { fill: var(--gold-bright); stroke: var(--gold-bright); filter: drop-shadow(0 0 5px var(--gold)); }
+  #label {
+    font-family: var(--display);
+    font-size: 0.78rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ---------- Steps (tarot cards) ---------- */
+  ul { list-style: none; margin: 0; padding: 0; }
+  li.item {
+    position: relative;
+    margin-bottom: 12px;
+    background: linear-gradient(160deg, rgba(52, 28, 102, 0.8), var(--card));
+    border: 1px solid var(--gold-dim);
+    border-radius: 14px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+    transition: border-color 0.25s, box-shadow 0.25s, opacity 0.25s, transform 0.2s;
+  }
+  li.item::before {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border: 1px solid rgba(226, 189, 107, 0.18);
+    border-radius: 9px;
+    pointer-events: none;
+  }
+  li.item label {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 18px;
+    cursor: pointer;
+  }
+  .eyebrow {
+    display: block;
+    font-family: var(--display);
+    font-size: 0.68rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2px;
+  }
+  .text { font-size: 1.35rem; font-weight: 600; line-height: 1.2; transition: color 0.3s; }
+  .text small { display: block; margin-top: 3px; font-size: 1.05rem; font-weight: 500; font-style: italic; color: var(--muted); }
+  .grow { flex: 1; }
+
+  li.item input {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: none;
+    width: 30px; height: 30px;
+    margin: 0;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: grid;
+    place-content: center;
+    cursor: pointer;
+    background: rgba(11, 7, 32, 0.6);
+    transition: background 0.25s, box-shadow 0.25s, transform 0.15s, border-color 0.25s;
+  }
+  li.item input::after {
+    content: "\2726";
+    font-size: 17px;
+    line-height: 1;
+    color: var(--night);
+    transform: scale(0) rotate(-90deg);
+    transition: transform 0.3s cubic-bezier(.3, 1.6, .5, 1);
+  }
+  li.item input:checked {
+    background: radial-gradient(circle, var(--gold-bright), var(--gold));
+    box-shadow: 0 0 14px rgba(247, 220, 149, 0.6);
+  }
+  li.item input:checked::after { transform: scale(1) rotate(0); }
+  li.item input:focus-visible { outline: 3px solid var(--lilac); outline-offset: 3px; }
+  li.item input:not(:disabled):active { transform: scale(0.88); }
+  li.item input:disabled { cursor: not-allowed; }
+
+  .lock { flex: none; width: 22px; height: 22px; color: var(--muted); display: none; }
+  .lock svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* States */
+  li.item.current {
+    border-color: var(--gold);
+    animation: glow 2.8s ease-in-out infinite;
+  }
+  li.item.current:hover { transform: translateY(-1px); }
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 6px 22px rgba(0,0,0,.35), 0 0 6px rgba(226,189,107,.25); }
+    50%      { box-shadow: 0 6px 22px rgba(0,0,0,.35), 0 0 22px rgba(226,189,107,.55); }
+  }
+  li.item.locked { opacity: 0.45; filter: saturate(0.6); }
+  li.item.locked label, li.item.sealed label { cursor: not-allowed; }
+  li.item.locked .lock { display: block; }
+  li.item.done .text { text-decoration: line-through; text-decoration-color: var(--gold); color: #9a89c4; }
+  li.item.done .text small { color: #7f70a5; }
+  li.item.done { border-color: rgba(226, 189, 107, 0.2); }
+  li.item.shake { animation: shake 0.35s; }
+  @keyframes shake {
+    20% { transform: translateX(-6px); } 40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); } 80% { transform: translateX(4px); }
+  }
+
+  li.divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 22px 0 18px;
+    font-family: var(--display);
+    font-size: 0.82rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-shadow: 0 0 10px var(--gold-dim);
+  }
+  li.divider::before, li.divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+
+  /* ---------- Live banner & clear button ---------- */
+  #live {
+    display: none;
+    text-align: center;
+    margin: 24px 0 0;
+    font-family: var(--display);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    color: var(--gold-bright);
+    text-shadow: 0 0 14px rgba(247, 220, 149, 0.6);
+  }
+  #live.show { display: block; animation: rise 0.6s ease; }
+  #clearBtn {
+    display: none;
+    width: 100%;
+    margin-top: 16px;
+    padding: 15px;
+    font-family: var(--display);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--night);
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 0 22px rgba(226, 189, 107, 0.35);
+    transition: transform 0.15s, filter 0.15s;
+  }
+  #clearBtn.show { display: block; animation: rise 0.6s ease; }
+  #clearBtn:hover { filter: brightness(1.08); }
+  #clearBtn:active { transform: scale(0.98); }
+  #clearBtn:focus-visible { outline: 3px solid var(--lilac); outline-offset: 3px; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  /* ---------- Toast ---------- */
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translate(-50%, 20px);
+    z-index: 20;
+    padding: 11px 20px;
+    background: rgba(20, 10, 46, 0.95);
+    border: 1px solid var(--gold-dim);
+    border-radius: 99px;
+    color: var(--gold-bright);
+    font-size: 1.1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+    max-width: 92vw;
+    text-align: center;
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ---------- Celebration ---------- */
+  #celebration {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(8, 4, 22, 0.82);
+    cursor: pointer;
+    padding: 18px;
+  }
+  #celebration.show { display: flex; animation: fade 0.35s ease; }
+  .yay {
+    position: relative;
+    text-align: center;
+    padding: 36px 40px 28px;
+    background: linear-gradient(160deg, #3a1d73, #1d0f40);
+    border: 2px solid var(--gold);
+    border-radius: 18px;
+    box-shadow: 0 0 60px rgba(226, 189, 107, 0.45);
+    animation: pop 0.7s cubic-bezier(.2, 1.5, .4, 1);
+    max-width: 440px;
+  }
+  .yay::before {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+  .yay .moon { font-size: 3rem; color: var(--gold-bright); animation: bounce 1.4s ease-in-out infinite; display: inline-block; text-shadow: 0 0 20px var(--gold); }
+  .yay .big {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(2.6rem, 11vw, 3.6rem);
+    margin: 4px 0 0;
+    color: var(--gold-bright);
+    text-shadow: 0 0 24px rgba(247, 220, 149, 0.6);
+  }
+  .yay .sub { font-size: 1.6rem; font-weight: 600; margin: 6px 0 0; }
+  .yay .note { font-size: 1.15rem; font-style: italic; color: var(--muted); margin: 6px 0 0; }
+  .yay .hint { font-family: var(--display); font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin-top: 22px; }
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 31; }
+
+  @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<svg id="wheel" viewBox="-250 -250 500 500" aria-hidden="true"></svg>
+
+<main>
+  <header>
+    <div class="orn">&#10022; &#9789; &#10022;</div>
+    <h1>Video Recording Checklist</h1>
+    <p class="subtitle">Tarot reading video &middot; complete each step in order</p>
+  </header>
+
+  <div class="constellation">
+    <svg id="constellation" viewBox="0 0 300 56" role="img" aria-label="Progress constellation"></svg>
+    <div id="label">0 of 7 steps complete</div>
+  </div>
+
+  <ul id="list"></ul>
+
+  <div id="live">&#10022; The video is live &#10022;</div>
+  <button id="clearBtn" type="button">Clear list &amp; begin anew</button>
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<div id="celebration" role="dialog" aria-label="Video is on!">
+  <div class="yay">
+    <div class="moon">&#9790;</div>
+    <p class="big">Yay!</p>
+    <p class="sub">Video is on!</p>
+    <p class="note">The stars have aligned &#10022;</p>
+    <p class="hint">Tap anywhere to close</p>
+  </div>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script>
+  /* ================= Checklist data ================= */
+  // "divider" entries are labels only (no checkbox)
+  const STEPS = [
+    { id: "storage",   text: "Check phone storage", note: "Needs a minimum of 5GB left" },
+    { id: "cleanup",   text: "Remove any videos of previous Tarot reading recordings done in the past" },
+    { id: "film",      text: "Film video" },
+    { id: "transfer",  text: "Transfer video to laptop" },
+    { divider: "On the next day" },
+    { id: "edit",      text: "Edit Video" },
+    { id: "thumbnail", text: "Make Thumbnail" },
+    { id: "publish",   text: "Publish it on YouTube" }
+  ];
+  const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+  const STORAGE_KEY = "videoRecordingChecklist.v2";
+
+  const checkable = STEPS.filter(s => !s.divider);
+  const lastIdx = checkable.length - 1;
+
+  const listEl = document.getElementById("list");
+  const labelEl = document.getElementById("label");
+  const clearBtn = document.getElementById("clearBtn");
+  const liveEl = document.getElementById("live");
+  const toastEl = document.getElementById("toast");
+  const celebration = document.getElementById("celebration");
+
+  /* ================= Saved state ================= */
+  function load() {
+    let raw = {};
+    try { raw = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch (e) {}
+    // Only keep an unbroken run of ticked steps from the top (steps must be in order)
+    const clean = {};
+    let ok = true;
+    checkable.forEach(s => {
+      if (ok && raw[s.id]) clean[s.id] = true; else ok = false;
+    });
+    return clean;
+  }
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+  let state = load();
+
+  /* ================= Build list (once) ================= */
+  const rows = []; // { li, input, id, idx }
+
+  const LOCK_SVG = '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+
+  (function build() {
+    let n = 0;
+    STEPS.forEach(step => {
+      const li = document.createElement("li");
+      if (step.divider) {
+        li.className = "divider";
+        li.textContent = "\u263E " + step.divider + " \u263D";
+        listEl.appendChild(li);
+        return;
+      }
+      const idx = n++;
+      li.className = "item";
+
+      const label = document.createElement("label");
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.addEventListener("change", () => onToggle(idx, input));
+
+      const wrap = document.createElement("span");
+      wrap.className = "grow";
+      const eyebrow = document.createElement("span");
+      eyebrow.className = "eyebrow";
+      eyebrow.textContent = "Step " + ROMAN[idx];
+      const text = document.createElement("span");
+      text.className = "text";
+      text.textContent = step.text;
+      if (step.note) {
+        const small = document.createElement("small");
+        small.textContent = step.note;
+        text.appendChild(small);
+      }
+      wrap.append(eyebrow, text);
+
+      const lock = document.createElement("span");
+      lock.className = "lock";
+      lock.innerHTML = LOCK_SVG;
+
+      label.append(input, wrap, lock);
+      li.appendChild(label);
+
+      // Clicking a blocked step gives gentle feedback
+      li.addEventListener("click", () => {
+        if (!input.disabled) return;
+        const status = statusOf(idx);
+        toast(status === "locked"
+          ? "Complete the previous step first \u2726"
+          : "Untick the latest step first to undo this one \u2726");
+        li.classList.remove("shake");
+        void li.offsetWidth;
+        li.classList.add("shake");
+      });
+      li.addEventListener("animationend", e => { if (e.animationName === "shake") li.classList.remove("shake"); });
+
+      listEl.appendChild(li);
+      rows.push({ li, input, id: step.id, idx });
+    });
+  })();
+
+  /* ================= Step logic ================= */
+  function firstUnchecked() {
+    return checkable.findIndex(s => !state[s.id]); // -1 when everything is done
+  }
+  // "current" = the next step to do, "locked" = not yet reachable,
+  // "undo" = last ticked step (can be unticked), "sealed" = ticked, earlier than the last ticked
+  function statusOf(idx) {
+    const cur = firstUnchecked();
+    const checked = !!state[checkable[idx].id];
+    if (!checked) return idx === cur ? "current" : "locked";
+    const lastDone = cur === -1 ? lastIdx : cur - 1;
+    return idx === lastDone ? "undo" : "sealed";
+  }
+
+  function sync() {
+    rows.forEach(r => {
+      const status = statusOf(r.idx);
+      const checked = !!state[r.id];
+      r.input.checked = checked;
+      r.input.disabled = !(status === "current" || status === "undo");
+      r.input.title = status === "locked" ? "Complete the previous step first"
+                    : status === "sealed" ? "Untick the latest step first" : "";
+      r.li.classList.toggle("done", checked);
+      r.li.classList.toggle("current", status === "current");
+      r.li.classList.toggle("locked", status === "locked");
+      r.li.classList.toggle("sealed", status === "sealed");
+    });
+    const done = checkable.filter(s => state[s.id]).length;
+    labelEl.textContent = done + " of " + checkable.length + " steps complete";
+    drawConstellation(done);
+    const all = done === checkable.length;
+    liveEl.classList.toggle("show", all);
+    clearBtn.classList.toggle("show", all);
+  }
+
+  function onToggle(idx, input) {
+    const status = statusOf(idx);
+    const wantChecked = input.checked;
+    const allowed = (wantChecked && status === "current") || (!wantChecked && status === "undo");
+    if (!allowed) { sync(); return; }
+    state[checkable[idx].id] = wantChecked;
+    if (!wantChecked) delete state[checkable[idx].id];
+    save();
+    sync();
+    if (wantChecked && idx === lastIdx) celebrate();
+  }
+
+  clearBtn.addEventListener("click", () => {
+    state = {};
+    save();
+    sync();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  /* ================= Toast ================= */
+  let toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2000);
+  }
+
+  /* ================= Constellation progress ================= */
+  const conEl = document.getElementById("constellation");
+  const NS = "http://www.w3.org/2000/svg";
+  const CON_Y = [34, 16, 38, 14, 36, 18, 30, 20, 32, 16];
+  function drawConstellation(done) {
+    const n = checkable.length;
+    const pts = checkable.map((_, i) => ({ x: 20 + i * (260 / Math.max(n - 1, 1)), y: CON_Y[i % CON_Y.length] }));
+    conEl.innerHTML = "";
+    for (let i = 0; i < n - 1; i++) {
+      const l = document.createElementNS(NS, "line");
+      l.setAttribute("x1", pts[i].x); l.setAttribute("y1", pts[i].y);
+      l.setAttribute("x2", pts[i + 1].x); l.setAttribute("y2", pts[i + 1].y);
+      l.setAttribute("class", "line" + (i + 1 < done ? " lit" : ""));
+      conEl.appendChild(l);
+    }
+    pts.forEach((p, i) => {
+      const c = document.createElementNS(NS, "circle");
+      c.setAttribute("cx", p.x); c.setAttribute("cy", p.y);
+      c.setAttribute("r", i < done ? 5 : 4);
+      c.setAttribute("class", "star" + (i < done ? " lit" : ""));
+      conEl.appendChild(c);
+    });
+  }
+
+  /* ================= Zodiac wheel background ================= */
+  (function buildWheel() {
+    const wheel = document.getElementById("wheel");
+    const signs = ["\u2648", "\u2649", "\u264A", "\u264B", "\u264C", "\u264D", "\u264E", "\u264F", "\u2650", "\u2651", "\u2652", "\u2653"];
+    const rad = d => (d - 90) * Math.PI / 180;
+    let outer = "", inner = "";
+
+    [240, 232, 172, 162].forEach(r => {
+      outer += `<circle r="${r}" fill="none" stroke="currentColor" stroke-width="${r === 240 || r === 162 ? 1.4 : 0.8}"/>`;
+    });
+    for (let d = 0; d < 360; d += 5) {
+      const long = d % 30 === 0;
+      const r1 = 232, r2 = long ? 172 : 224;
+      outer += `<line x1="${r1 * Math.cos(rad(d))}" y1="${r1 * Math.sin(rad(d))}" x2="${r2 * Math.cos(rad(d))}" y2="${r2 * Math.sin(rad(d))}" stroke="currentColor" stroke-width="${long ? 1 : 0.5}"/>`;
+    }
+    signs.forEach((g, i) => {
+      const a = rad(i * 30 + 15), r = 202;
+      // \uFE0E forces the text (not emoji) glyph
+      outer += `<text x="${r * Math.cos(a)}" y="${r * Math.sin(a)}" text-anchor="middle" dominant-baseline="central" font-size="24" fill="currentColor" font-family="serif">${g}\uFE0E</text>`;
+    });
+
+    // Inner ring: hexagram, circles, sun
+    const tri = (offset) => [0, 120, 240].map(d => `${150 * Math.cos(rad(d + offset))},${150 * Math.sin(rad(d + offset))}`).join(" ");
+    inner += `<polygon points="${tri(0)}" fill="none" stroke="currentColor" stroke-width="1"/>`;
+    inner += `<polygon points="${tri(180)}" fill="none" stroke="currentColor" stroke-width="1"/>`;
+    inner += `<circle r="100" fill="none" stroke="currentColor" stroke-width="0.8"/>`;
+    inner += `<circle r="60" fill="none" stroke="currentColor" stroke-width="1.2"/>`;
+    for (let d = 0; d < 360; d += 15) {
+      const long = d % 45 === 0;
+      const r1 = 60, r2 = long ? 100 : 80;
+      inner += `<line x1="${r1 * Math.cos(rad(d))}" y1="${r1 * Math.sin(rad(d))}" x2="${r2 * Math.cos(rad(d))}" y2="${r2 * Math.sin(rad(d))}" stroke="currentColor" stroke-width="0.6"/>`;
+    }
+    inner += `<circle r="18" fill="none" stroke="currentColor" stroke-width="1.2"/><circle r="5" fill="currentColor"/>`;
+
+    wheel.innerHTML = `<g class="outer">${outer}</g><g class="inner">${inner}</g>`;
+  })();
+
+  /* ================= Twinkling night sky ================= */
+  const sky = document.getElementById("sky");
+  const sctx = sky.getContext("2d");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let stars = [];
+  let shooting = null;
+
+  function sizeSky() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    sky.width = window.innerWidth * dpr;
+    sky.height = window.innerHeight * dpr;
+    sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const count = Math.round(window.innerWidth * window.innerHeight / 7000);
+    const tints = ["#ffffff", "#f7dc95", "#cdbdff", "#ffd6ea"];
+    stars = Array.from({ length: count }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: Math.random() * 1.4 + 0.3,
+      speed: Math.random() * 0.002 + 0.0005,
+      phase: Math.random() * Math.PI * 2,
+      color: tints[Math.floor(Math.random() * tints.length)]
+    }));
+  }
+
+  function drawSky(t) {
+    sctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    stars.forEach(s => {
+      const a = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * s.speed + s.phase));
+      sctx.globalAlpha = a;
+      sctx.fillStyle = s.color;
+      sctx.beginPath();
+      sctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      sctx.fill();
+    });
+    // occasional shooting star
+    if (!shooting && Math.random() < 0.0015) {
+      shooting = { x: Math.random() * window.innerWidth * 0.8, y: Math.random() * window.innerHeight * 0.4, life: 0 };
+    }
+    if (shooting) {
+      shooting.life += 1;
+      const p = shooting.life / 40;
+      const x = shooting.x + p * 260, y = shooting.y + p * 120;
+      const g = sctx.createLinearGradient(x, y, x - 90, y - 42);
+      g.addColorStop(0, "rgba(247,220,149,0.9)");
+      g.addColorStop(1, "rgba(247,220,149,0)");
+      sctx.globalAlpha = 1 - p;
+      sctx.strokeStyle = g;
+      sctx.lineWidth = 1.6;
+      sctx.beginPath();
+      sctx.moveTo(x, y);
+      sctx.lineTo(x - 90, y - 42);
+      sctx.stroke();
+      if (shooting.life >= 40) shooting = null;
+    }
+    sctx.globalAlpha = 1;
+  }
+
+  function skyLoop(t) {
+    drawSky(t);
+    requestAnimationFrame(skyLoop);
+  }
+  sizeSky();
+  if (reduceMotion) drawSky(0); else requestAnimationFrame(skyLoop);
+
+  /* ================= Celebration confetti ================= */
+  const canvas = document.getElementById("confetti");
+  const ctx = canvas.getContext("2d");
+  let pieces = [];
+  let raf = null;
+
+  function sizeConfetti() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", () => { sizeConfetti(); sizeSky(); if (reduceMotion) drawSky(0); });
+  sizeConfetti();
+
+  function drawStar(r) {
+    ctx.beginPath();
+    for (let k = 0; k < 8; k++) {
+      const a = k * Math.PI / 4;
+      const rad = k % 2 === 0 ? r : r * 0.3;
+      ctx.lineTo(Math.cos(a) * rad, Math.sin(a) * rad);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function celebrate() {
+    celebration.classList.add("show");
+    if (reduceMotion) return;
+    const colors = ["#f7dc95", "#e2bd6b", "#b79cff", "#e58fb3", "#ffffff"];
+    pieces = Array.from({ length: 150 }, () => ({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * canvas.height * 0.6,
+      r: 4 + Math.random() * 9,
+      vx: (Math.random() - 0.5) * 2.5,
+      vy: 1.8 + Math.random() * 3.5,
+      rot: Math.random() * Math.PI,
+      vr: (Math.random() - 0.5) * 0.15,
+      star: Math.random() < 0.7,
+      color: colors[Math.floor(Math.random() * colors.length)]
+    }));
+    if (raf) cancelAnimationFrame(raf);
+    tick();
+  }
+
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      if (p.star) drawStar(p.r);
+      else { ctx.beginPath(); ctx.arc(0, 0, p.r * 0.35, 0, Math.PI * 2); ctx.fill(); }
+      ctx.restore();
+    });
+    pieces = pieces.filter(p => p.y < canvas.height + 30);
+    if (pieces.length) raf = requestAnimationFrame(tick);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  celebration.addEventListener("click", () => {
+    celebration.classList.remove("show");
+    pieces = [];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+
+  sync();
+</script>
+</body>
+</html>
